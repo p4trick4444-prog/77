@@ -91,6 +91,7 @@ button:disabled{opacity:.6}
     transition:.4s;
 }
 .slot.show{opacity:1;transform:none}
+
 .highest{
     border:2px solid var(--main);
     box-shadow:0 0 35px var(--glow);
@@ -104,6 +105,7 @@ button:disabled{opacity:.6}
     border:2px solid #fff;
     box-shadow:0 0 25px rgba(255,255,255,.95);
 }
+
 @media(max-width:768px){.slot-container{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:480px){.slot-container{grid-template-columns:1fr}button{width:100%}}
 </style>
@@ -130,14 +132,20 @@ button:disabled{opacity:.6}
 </div>
 
 <script>
+/* ====== 基本設定 ====== */
 let version="II";
 let cooling=false;
+const COOLDOWN=1800;
+const KEY="cooldownEnd";
 
+/* ====== 背景 ====== */
 function changeBg(img){
     document.body.style.backgroundImage=`url("${img}")`;
     document.body.classList.add("bg-fade");
     setTimeout(()=>document.body.classList.remove("bg-fade"),800);
 }
+
+/* ====== 粒子 ====== */
 function particlesGen(n=60){
     particles.innerHTML="";
     for(let i=0;i<n;i++){
@@ -149,17 +157,22 @@ function particlesGen(n=60){
         particles.appendChild(d);
     }
 }
+
 function rand(n,m){return Math.floor(Math.random()*(m-n+1))+n}
 
+/* ====== 房間生成 ====== */
 function generate(){
     slots.innerHTML="";
     slots.style.display="grid";
     progressWrap.style.display="block";
     progressBar.style.width="0%";
+    progressText.innerText="爆分機率計算中…";
+
     let data=[];
     for(let i=0;i<3;i++)data.push({r:rand(1,3000),p:rand(85,92),c:"highest"});
     for(let i=0;i<12;i++)data.push({r:rand(1,3000),p:rand(70,84),c:"high"});
     while(data.length<30)data.push({r:rand(1,3000),p:rand(50,69),c:""});
+
     let done=0;
     data.forEach((d,i)=>{
         let div=document.createElement("div");
@@ -170,28 +183,40 @@ function generate(){
             div.classList.add("show");
             done++;
             progressBar.style.width=Math.floor(done/data.length*100)+"%";
+            if(done===data.length){
+                progressText.innerText="爆分機率計算完成 ♥";
+            }
         },i*40);
     });
 }
 
+/* ====== 倒數（不重置） ====== */
 function refresh(){
     if(cooling)return;
     generate();
+    let end=Date.now()+COOLDOWN*1000;
+    localStorage.setItem(KEY,end);
+    startCountdown(end);
+}
+
+function startCountdown(end){
     cooling=true;
-    let t=1800;
     countBtn.disabled=true;
     let timer=setInterval(()=>{
-        t--;
-        countBtn.innerText=`♥ ${String(t/60|0).padStart(2,"0")}:${String(t%60).padStart(2,"0")} ♥`;
+        let t=Math.ceil((end-Date.now())/1000);
         if(t<=0){
             clearInterval(timer);
             cooling=false;
             countBtn.disabled=false;
             countBtn.innerText="三十分鐘換一次 ♥";
+            localStorage.removeItem(KEY);
+            return;
         }
+        countBtn.innerText=`♥ ${String(t/60|0).padStart(2,"0")}:${String(t%60).padStart(2,"0")} ♥`;
     },1000);
 }
 
+/* ====== 版本切換 ====== */
 function toggleVer(){
     version=version==="II"?"I":"II";
     document.body.className=version==="I"?"ver-I":"ver-II";
@@ -200,10 +225,15 @@ function toggleVer(){
     generate();
 }
 
+/* ====== 初始化 ====== */
 window.onload=()=>{
     changeBg("bg2.jpg");
     particlesGen();
     generate();
+    let saved=localStorage.getItem(KEY);
+    if(saved && saved>Date.now()){
+        startCountdown(saved);
+    }
 };
 </script>
 </body>
