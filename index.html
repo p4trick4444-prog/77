@@ -12,15 +12,12 @@
     --glow:rgba(201,163,255,.95);
     --particle:rgba(240,230,255,.75);
 }
-
-/* 🔴 版本 I：紅色 */
 body.ver-I{
     --main:#ff3b3b;
     --light:#ff9a9a;
     --glow:rgba(255,60,60,1);
     --particle:rgba(255,210,210,.7);
 }
-
 body{
     font-family:"Microsoft JhengHei",Arial,sans-serif;
     background:center/cover fixed no-repeat;
@@ -32,8 +29,6 @@ body{
     min-height:100vh;
     overflow:hidden;
 }
-
-/* 背景圖片層 */
 body::before{
     content:"";
     position:fixed;
@@ -45,22 +40,10 @@ body::before{
 }
 body.bg-fade::before{opacity:1;}
 
-@keyframes bgBeat{
-    0%,100%{background-size:100%}
-    50%{background-size:105%}
-}
-
-#particles{
-    position:fixed;
-    inset:0;
-    pointer-events:none;
-    z-index:-2;
-}
+#particles{position:fixed;inset:0;pointer-events:none;z-index:-2;}
 .particle{
     position:absolute;
-    width:6px;
-    height:6px;
-    border-radius:50%;
+    width:6px;height:6px;border-radius:50%;
     background:var(--particle);
     animation:float linear infinite;
 }
@@ -70,51 +53,31 @@ body.bg-fade::before{opacity:1;}
 }
 
 .container{max-width:1000px;width:100%;text-align:center}
+h1{color:var(--main);text-shadow:0 0 18px var(--glow);}
 
-h1{
-    color:var(--main);
-    text-shadow:0 0 18px var(--glow);
-}
-
-/* 按鈕 */
 button{
-    width:200px;
-    margin:6px;
-    padding:12px;
-    border:none;
-    border-radius:16px;
-    font-weight:bold;
-    color:#fff;
+    width:200px;margin:6px;padding:12px;
+    border:none;border-radius:16px;
+    font-weight:bold;color:#fff;
     background:linear-gradient(to bottom,var(--light),var(--main));
     box-shadow:0 6px 18px rgba(0,0,0,.55);
     cursor:pointer;
 }
 button:disabled{opacity:.6}
 
-/* 讀取條 */
 .progress-wrap{
-    width:100%;
-    max-width:520px;
-    height:34px;
-    margin:18px auto;
+    width:100%;max-width:520px;height:34px;margin:18px auto;
     background:rgba(0,0,0,.55);
     border-radius:20px;
-    overflow:hidden;
-    display:none;
+    overflow:hidden;display:none;
 }
 .progress-bar{
-    height:100%;
-    width:0%;
+    height:100%;width:0%;
     background:linear-gradient(90deg,var(--light),var(--main));
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    color:#fff;
+    display:flex;align-items:center;justify-content:center;
     font-weight:bold;
-    transition:.3s;
 }
 
-/* 房間 */
 .slot-container{
     display:none;
     grid-template-columns:repeat(3,1fr);
@@ -122,17 +85,12 @@ button:disabled{opacity:.6}
 }
 .slot{
     background:rgba(10,10,10,.9);
-    padding:14px;
-    border-radius:12px;
-    display:flex;
-    justify-content:space-between;
-    opacity:0;
-    transform:translateY(20px);
+    padding:14px;border-radius:12px;
+    display:flex;justify-content:space-between;
+    opacity:0;transform:translateY(20px);
     transition:.4s;
 }
 .slot.show{opacity:1;transform:none}
-
-/* 大獎 */
 .highest{
     border:2px solid var(--main);
     box-shadow:0 0 35px var(--glow);
@@ -142,21 +100,12 @@ button:disabled{opacity:.6}
     0%,100%{transform:scale(1)}
     50%{transform:scale(1.05)}
 }
-
-/* 二獎 */
 .high{
     border:2px solid #fff;
-    color:#fff;
     box-shadow:0 0 25px rgba(255,255,255,.95);
 }
-
-@media(max-width:768px){
-    .slot-container{grid-template-columns:repeat(2,1fr)}
-}
-@media(max-width:480px){
-    .slot-container{grid-template-columns:1fr}
-    button{width:100%}
-}
+@media(max-width:768px){.slot-container{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.slot-container{grid-template-columns:1fr}button{width:100%}}
 </style>
 </head>
 
@@ -167,7 +116,7 @@ button:disabled{opacity:.6}
 <h1 id="title">♥ 77朕天下專屬 ♥ 賽特II爆分機率房</h1>
 
 <div>
-<button id="countBtn" onclick="refresh()">五分鐘換一次 ♥</button>
+<button id="countBtn" onclick="refresh()">三十分鐘換一次 ♥</button>
 <button onclick="toggleVer()">切換版本</button>
 </div>
 
@@ -189,20 +138,17 @@ function changeBg(img){
     document.body.classList.add("bg-fade");
     setTimeout(()=>document.body.classList.remove("bg-fade"),800);
 }
-
-function particles(n=60){
-    const p=document.getElementById("particles");
-    p.innerHTML="";
+function particlesGen(n=60){
+    particles.innerHTML="";
     for(let i=0;i<n;i++){
         let d=document.createElement("div");
         d.className="particle";
         d.style.left=Math.random()*100+"%";
         d.style.bottom=Math.random()*100+"%";
         d.style.animationDuration=5+Math.random()*10+"s";
-        p.appendChild(d);
+        particles.appendChild(d);
     }
 }
-
 function rand(n,m){return Math.floor(Math.random()*(m-n+1))+n}
 
 function generate(){
@@ -210,29 +156,21 @@ function generate(){
     slots.style.display="grid";
     progressWrap.style.display="block";
     progressBar.style.width="0%";
-    progressText.innerText="爆分機率計算中…";
-
     let data=[];
     for(let i=0;i<3;i++)data.push({r:rand(1,3000),p:rand(85,92),c:"highest"});
     for(let i=0;i<12;i++)data.push({r:rand(1,3000),p:rand(70,84),c:"high"});
     while(data.length<30)data.push({r:rand(1,3000),p:rand(50,69),c:""});
-
     let done=0;
     data.forEach((d,i)=>{
         let div=document.createElement("div");
         div.className="slot "+d.c;
         div.innerHTML=`<span>第 ${d.r} 房</span><span>${d.p}%</span>`;
         slots.appendChild(div);
-
         setTimeout(()=>{
             div.classList.add("show");
             done++;
-            let per=Math.floor(done/data.length*100);
-            progressBar.style.width=per+"%";
-            if(done===data.length){
-                progressText.innerText="爆分機率計算完成 ♥";
-            }
-        },i*50);
+            progressBar.style.width=Math.floor(done/data.length*100)+"%";
+        },i*40);
     });
 }
 
@@ -240,17 +178,16 @@ function refresh(){
     if(cooling)return;
     generate();
     cooling=true;
-    let t=300;
-    let btn=countBtn;
-    btn.disabled=true;
+    let t=1800;
+    countBtn.disabled=true;
     let timer=setInterval(()=>{
         t--;
-        btn.innerText=`♥ ${String(t/60|0).padStart(2,"0")}:${String(t%60).padStart(2,"0")} ♥`;
+        countBtn.innerText=`♥ ${String(t/60|0).padStart(2,"0")}:${String(t%60).padStart(2,"0")} ♥`;
         if(t<=0){
             clearInterval(timer);
             cooling=false;
-            btn.disabled=false;
-            btn.innerText="五分鐘換一次 ♥";
+            countBtn.disabled=false;
+            countBtn.innerText="三十分鐘換一次 ♥";
         }
     },1000);
 }
@@ -265,7 +202,7 @@ function toggleVer(){
 
 window.onload=()=>{
     changeBg("bg2.jpg");
-    particles();
+    particlesGen();
     generate();
 };
 </script>
