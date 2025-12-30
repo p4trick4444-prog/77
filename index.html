@@ -6,6 +6,7 @@
 <title>♥ 77朕天下專屬 ♥ 賽特爆分機率房</title>
 
 <style>
+/* === 原樣保留（完全未動） === */
 :root{
     --main:#c9a3ff;
     --light:#e6d7ff;
@@ -132,20 +133,45 @@ button:disabled{opacity:.6}
 </div>
 
 <script>
-/* ====== 基本設定 ====== */
+/* =========================
+   ⭐ 唯一新增：房號池機制
+   ========================= */
+const ROOM_MIN = 1;
+const ROOM_MAX = 3000;
+const KEEP_ROUNDS = 3;
+
+let recentRooms = []; // 記錄最近 3 次用過的房號
+
+function getUniqueRooms(count){
+    let used = new Set(recentRooms.flat());
+    let pool = [];
+
+    for(let i=ROOM_MIN;i<=ROOM_MAX;i++){
+        if(!used.has(i)) pool.push(i);
+    }
+
+    pool.sort(()=>Math.random()-.5);
+    let result = pool.slice(0,count);
+
+    recentRooms.push(result);
+    if(recentRooms.length > KEEP_ROUNDS){
+        recentRooms.shift();
+    }
+    return result;
+}
+
+/* ====== 原本 JS（只在 generate 用到房號池） ====== */
 let version="II";
 let cooling=false;
 const COOLDOWN=1800;
 const KEY="cooldownEnd";
 
-/* ====== 背景 ====== */
 function changeBg(img){
     document.body.style.backgroundImage=`url("${img}")`;
     document.body.classList.add("bg-fade");
     setTimeout(()=>document.body.classList.remove("bg-fade"),800);
 }
 
-/* ====== 粒子 ====== */
 function particlesGen(n=60){
     particles.innerHTML="";
     for(let i=0;i<n;i++){
@@ -160,7 +186,7 @@ function particlesGen(n=60){
 
 function rand(n,m){return Math.floor(Math.random()*(m-n+1))+n}
 
-/* ====== 房間生成 ====== */
+/* ====== 生成（僅這裡用唯一房號） ====== */
 function generate(){
     slots.innerHTML="";
     slots.style.display="grid";
@@ -168,16 +194,18 @@ function generate(){
     progressBar.style.width="0%";
     progressText.innerText="爆分機率計算中…";
 
+    const rooms = getUniqueRooms(30);
+
     let data=[];
-    for(let i=0;i<3;i++)data.push({r:rand(1,3000),p:rand(85,92),c:"highest"});
-    for(let i=0;i<12;i++)data.push({r:rand(1,3000),p:rand(70,84),c:"high"});
-    while(data.length<30)data.push({r:rand(1,3000),p:rand(50,69),c:""});
+    for(let i=0;i<3;i++)data.push({p:rand(85,92),c:"highest"});
+    for(let i=0;i<12;i++)data.push({p:rand(70,84),c:"high"});
+    while(data.length<30)data.push({p:rand(50,69),c:""});
 
     let done=0;
     data.forEach((d,i)=>{
         let div=document.createElement("div");
         div.className="slot "+d.c;
-        div.innerHTML=`<span>第 ${d.r} 房</span><span>${d.p}%</span>`;
+        div.innerHTML=`<span>第 ${rooms[i]} 房</span><span>${d.p}%</span>`;
         slots.appendChild(div);
         setTimeout(()=>{
             div.classList.add("show");
@@ -190,7 +218,6 @@ function generate(){
     });
 }
 
-/* ====== 倒數（不重置） ====== */
 function refresh(){
     if(cooling)return;
     generate();
@@ -216,7 +243,6 @@ function startCountdown(end){
     },1000);
 }
 
-/* ====== 版本切換 ====== */
 function toggleVer(){
     version=version==="II"?"I":"II";
     document.body.className=version==="I"?"ver-I":"ver-II";
@@ -225,15 +251,12 @@ function toggleVer(){
     generate();
 }
 
-/* ====== 初始化 ====== */
 window.onload=()=>{
     changeBg("bg2.jpg");
     particlesGen();
     generate();
     let saved=localStorage.getItem(KEY);
-    if(saved && saved>Date.now()){
-        startCountdown(saved);
-    }
+    if(saved && saved>Date.now()) startCountdown(saved);
 };
 </script>
 </body>
